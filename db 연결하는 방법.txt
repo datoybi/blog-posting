@@ -1,0 +1,6 @@
+1. 당연히 npm install 하고 기본적인 세팅 하기 
+2. 디비랑 연결될법한 것들 추가
+npm install pg
+npm install dotenv --save
+dotenv 처리를 위해 app.js 에 require('dotenv').config();
+최상위 폴더에서 .env 생성
