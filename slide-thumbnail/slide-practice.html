@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    * {box-sizing:border-box}
+
+    .slideshow-container {
+        width: 50%;
+        position: relative;
+    }
+    #small_container {
+        width: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .mySlides {
+    display: none;
+    }
+
+    .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    }
+
+    .next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+    }
+
+    .prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+    }
+
+    .fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fade;
+    animation-duration: 1.5s;
+    }
+
+    @-webkit-keyframes fade {
+    from {opacity: .4}
+    to {opacity: 1}
+    }
+
+    @keyframes fade {
+    from {opacity: .4}
+    to {opacity: 1}
+    }
+
+    .smallimg {
+        width: 25%;
+        cursor: pointer;  
+    }
+    .mini_prev, .mini_next {
+        cursor: pointer;
+        position: absolute;
+        padding: 10px;
+        color: white;
+        font-weight: bold;
+        font-size: 13px;
+        border-radius: 0 3px 3px 0;
+    }
+
+    .mini_next {
+        right : 0
+    }
+
+</style>
+</head>
+    <body>
+    <!-- Slideshow container -->
+    <div class="box">
+        <div class="slideshow-container">
+            <div class="mySlides fade">
+                <img src="img1.jpg" style="width:100%">
+            </div>
+        
+            <div class="mySlides fade">
+                <img src="img2.jpg" style="width:100%">
+            </div>
+        
+            <div class="mySlides fade">
+                <img src="img3.jpg" style="width:100%">
+            </div>
+
+            <div class="mySlides fade">
+                <img src="img4.jpg" style="width:100%">
+            </div>
+            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+        <br>
+        <div id="small_container">
+            <a class="mini_prev" style="background-color: black" onclick="miniSlides(-1)">&#10094;</a>
+            <div class="smallimg">
+                <img src="img1.jpg"  style="width:100%" onclick="currentSlide(1)">
+            </div>
+            <div class="smallimg">
+                <img src="img2.jpg" style="width:100%" onclick="currentSlide(2)">
+            </div>
+            <div class="smallimg">
+                <img src="img3.jpg" style="width:100%" onclick="currentSlide(3)">
+            </div>
+            <div class="smallimg" >
+                <img src="img4.jpg" style="width:100%" onclick="currentSlide(4)">
+            </div>
+            <a class="mini_next" style="background-color: black"  onclick="miniSlides(1)">&#10095;</a>
+        </div>  
+    </div>
+<script>
+
+var slideIndex = 1; // 기본 1로 설정
+showSlides(slideIndex);
+
+function plusSlides(n) { // 옆으로 가는 버튼 눌렀을 때
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) { // 작은 이미지들 눌렀을 때 큰 이미지가 바뀌는 이벤트
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+    var i;
+    var slides = document.getElementsByClassName("mySlides");
+    if (n > slides.length) {slideIndex = 1} // n이 slides의 길이보다 길면 (플러스버튼을 눌러서 끝까지 갔으면) 첫번째 슬라이드(1)로 돌아오기
+    if (n < 1) {slideIndex = slides.length} // n이 1보다 작을 때 : (0이 되었을 때) 처음 슬라이드까지 갔으면 뒤로 돌아오기
+    for (i = 0; i < slides.length; i++) { // 모든 슬라이드 안보이게 설정 하고
+        slides[i].style.display = "none";
+    }
+    slides[slideIndex-1].style.display = "block"; // 특정 슬라이드 (지정한 슬라이드)만 보이게 
+}
+
+function miniSlides(n){
+    var small_container = document.getElementById("small_container")    
+    var slides = document.getElementsByClassName("smallimg");
+
+    if(n == 1) { // 오른쪽 버튼 눌렀을 떄 
+            small_container.insertBefore(slides[3], slides[0]); // jquery로 하면 더 쉬울 것 같은데. insertBefore(삽입할 노드, 기준점 노드)
+        } else if (n == -1) { // 왼쪽 버튼 눌렀을 때
+            small_container.insertBefore(slides[0], slides[4]);
+    }
+}
+
+</script>
+
+</body>
+</html> 
