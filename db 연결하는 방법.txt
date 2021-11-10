@@ -3,4 +3,4 @@
 npm install pg
 npm install dotenv --save
 dotenv 처리를 위해 app.js 에 require('dotenv').config();
-최상위 폴더에서 .env 생성
+
