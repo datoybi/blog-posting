@@ -1,24 +1,17 @@
 var express = require('express');
 var router = express.Router();
-let db = require('../config/db')
+let db = require('../db/index')
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', async function(req, res, next) {
 
+  const count = await db.getStudentCount();
+  console.log('in controller : '  + count) // 5
 
-  // db.connect()
+  const data = await db.getStudentInfo();
+  console.log('in controller : '  + JSON.stringify(data))
+
+  res.render('index', {count: count, data: data})
 });
 
 module.exports = router;
-
-
-// const db = new Pool(
-//     {
-//         host: 'localhost',
-//         user: 'postgres',
-//         password: '1234',
-//         port: 5432,
-//         database: 'TEST'
-//     }
-// )
