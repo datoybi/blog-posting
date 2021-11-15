@@ -143,12 +143,12 @@ function showSlides(n) {
     for (i = 0; i < slides.length; i++) { // 모든 슬라이드 안보이게 설정 하고
         slides[i].style.display = "none";
     }
-    slides[slideIndex-1].style.display = "block"; // 특정 슬라이드 (지정한 슬라이드)만 보이게 
+    slides[slideIndex-1].style.display = "block"; // 특정 슬라이드 (지정한 슬라이드)만 보이게 처리
 }
 
 function miniSlides(n){
     var small_container = document.getElementById("small_container")    
-    var slides = document.getElementsByClassName("smallimg");
+    var slides = document.getElementsByClassName("smallimg"); 
 
     if(n == 1) { // 오른쪽 버튼 눌렀을 떄 
             small_container.insertBefore(slides[3], slides[0]); // jquery로 하면 더 쉬울 것 같은데. insertBefore(삽입할 노드, 기준점 노드)
