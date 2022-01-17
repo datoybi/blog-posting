@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-let db = require('../config/db')
+let db = require('../db/config')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
