@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Success!</h1>
+
+    <% if(file){ %>
+    <pre><%=JSON.stringify(file, null, 2)%></pre>
+    <% }%>
+    
+    <% if(files){ %>
+    <pre><%=JSON.stringify(files, null, 2)%></pre>
+    <% }%>
+    
+    <a href='/'>Back</a>
+    </body>
+</html>
