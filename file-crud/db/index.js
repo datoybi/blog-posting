@@ -14,7 +14,7 @@ async function getFileCount() {
 
 async function insertPost(title, content, isfile) {
     let postPk = Number(await getPostCount())+1
-    let query = `INSERT INTO post VALUES('${title}', '${content}', '${isfile}', '${postPk}')`
+    let query = `INSERT INTO post VALUES('${title}', '${content}', '${isfile}', '${postPk}', 0)`
     await db.query(query)
     return postPk
 }
@@ -29,7 +29,7 @@ async function insertfile(postPk, fileName) {
 }
 
 async function selectPost(postPk) {
-    let query = `SELECT * FROM post WHERE post_pk = ${postPk}`
+    let query = `SELECT * FROM post WHERE post_pk = '${postPk}' and isdelete = '0'`
     let {rows} = await db.query(query)
     let contents = []
     let files
@@ -63,6 +63,38 @@ async function selectFiles(postPk) {
     return files
 }
 
+async function deletePost(postPk) {
+    let query = `UPDATE post SET isdelete=1 WHERE post_pk = ${postPk}`
+    await db.query(query)
+    let isfile = isFile(postPk)
+
+    if(isfile == '1') {
+        deleteFile(postPk)
+    }
+}
+
+async function isFile(postPk) {
+    let query = `SELECT file FROM POST WHERE post_pk = ${postPk}`
+    let {rows} = await db.query(query)
+    return rows[0].file
+}
+
+async function deleteFile(postPk) {
+    let query = `DELETE FROM files WHERE post_pk = ${postPk}`
+    await db.query(query)
+}
+
+async function updatePost(title, content, isfile, postPk) {
+    if(isFile(postPk) == '1'){ // 파일이 존재하면 다 삭제하기
+        deleteFile(postPk)
+    }
+
+    let query = `UPDATE post SET title = '${title}', contents = '${content}', file = '${isfile}'
+    WHERE post_pk = ${postPk}`
+    await db.query(query)
+}
+
+
 
 module.exports={
     getPostCount,
@@ -70,5 +102,8 @@ module.exports={
     insertPost,
     insertfile,
     selectPost,
-    selectFiles
+    selectFiles,
+    deletePost,
+    updatePost,
+    isFile
 }
