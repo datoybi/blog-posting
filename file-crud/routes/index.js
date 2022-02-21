@@ -34,7 +34,6 @@ router.post('/insertPost', upload.array('files'), async function(req,res){
     }
     await db.insertfile(postPk, fileName) // post 추가
   }
-
   res.send({'postPk':postPk})
 });
 
@@ -54,7 +53,7 @@ router.get('/delete', async function(req,res){
   
   // 업로드된 파일 제거
   for(let file of files){
-    fs.unlink(`${process.env.FILE_LOCATION}/${file.location}`, err => { 
+    fs.unlink(`${process.env.FILE_LOCATION}/${file.name}`, err => { 
       if(err){
         console.log('파일제거 에러 발생')
       }
@@ -66,6 +65,7 @@ router.get('/delete', async function(req,res){
 router.get('/update', async function(req,res){
   const postPk = req.query.postPk
   let result = await db.selectPost(postPk) 
+  console.log(result)
   res.render('update', {data: result, postPk: postPk});
 });
 
@@ -74,40 +74,61 @@ router.post('/updatePost', upload.array('files'), async function(req,res){
   let postPk = JSON.parse(body).postPk
   let title = JSON.parse(body).title
   let content = JSON.parse(body).content
-  let isOldfile = await db.isFile(postPk)
+  let isDBfile = await db.isFile(postPk)
   let oldFiles = JSON.parse(body).oldFiles
-  let isfile = '0'
-  console.log('old files (이미 파일이 있는것 중에 새로운 이미지): ' + JSON.stringify(oldFiles)) // 
-  console.log('new added files : ' + JSON.stringify(req.files)) // 
+  let isNewFile = '0'
+  let isFile = '1'
+  console.log('old files (이미 파일이 있는것 중에 새로운 이미지): ' + JSON.stringify(oldFiles))
+  console.log('new added files : ' + JSON.stringify(req.files))
+  let dbFiles
+  let dbFileLen
 
-  // 기존 사진 DB, FS 둘다에서 지우기
-  // fs에서 지우려면 file name으로 file read 한담에 
-  // req files에서 기존에 있는지 없는지 판별
-  if (oldfile == '1'){
-    let dbFiles = await db.selectFiles(postPk)
+  console.log('isDBfILE : ' + isDBfile)
+  if (isDBfile == '1'){
+    dbFiles = await db.selectFiles(postPk)
+    dbFileLen = dbFiles.length
     console.log('dbFiles : ' + dbFiles)
+
+    for(let i=0; i < dbFiles.length; i++){
+      for(let j of oldFiles){
+        if(dbFiles[i].name == j) {
+          dbFiles.splice(i, 1)
+        }
+      } 
+    }
+    if(dbFiles) {
+      await db.updateOriginFiles(dbFiles) // db 삭제
+      for(let file of dbFiles){ // 업로드 이미지 삭제
+        fs.unlink(`${process.env.FILE_LOCATION}/${file.name}`, err => { 
+          if(err){
+            console.log('파일제거 에러 발생')
+          }
+        })
+      }
   }
-  //   for(let file of oldfiles){
-  //     fs.unlink(`${process.env.FILE_LOCATION}/${file.location}`, err => { 
-  //       if(err){
-  //         console.log('파일제거 에러 발생')
-  //       }
-  //     });
-  //   }
-  // }
+}
 
-  // if(req.files.length != 0){
-  //   isfile = '1'
-  // }
 
-  // await db.updatePost(title, content, isfile, postPk) // post 수정
-  // if(isfile == '1'){ // 파일이 존재하면
-  //   let fileName = []
-  //   for(file of req.files) {
-  //     fileName.push(file.filename)
-  //   }
-  //   await db.insertfile(postPk, fileName) // post 추가
-  // }
+if(req.files.length != 0){
+  isNewFile = '1'
+}
+
+if(isNewFile == '1'){ // 파일이 존재하면
+  let fileName = []
+  for(file of req.files) {
+    fileName.push(file.filename)
+  }
+  await db.insertfile(postPk, fileName) // post 추가
+}
+
+let checkIsFile = await db.checkIsFile(postPk)
+console.log('checkIsFile : ' + checkIsFile)
+
+if(checkIsFile == '0') {
+  isFile = '0'
+}
+
+await db.updatePost(title, content, isFile, postPk) // post 수정  
 
   res.send({'postPk':postPk})
 });

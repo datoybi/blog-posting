@@ -20,7 +20,6 @@ async function insertPost(title, content, isfile) {
 }
 
 async function insertfile(postPk, fileName) {
-    // let fileLocation = `${process.env.FILE_LOCATION}`
     for(file of fileName){
         let filePk = Number(await getFileCount())+1
         let query = `INSERT INTO files VALUES('${postPk}', '${file}', '${filePk}')`
@@ -32,7 +31,8 @@ async function selectPost(postPk) {
     let query = `SELECT * FROM post WHERE post_pk = '${postPk}' and isdelete = '0'`
     let {rows} = await db.query(query)
     let contents = []
-    let files
+    let files = ""
+    let data
 
     let tmp = {
         title : rows[0].title,
@@ -50,13 +50,13 @@ async function selectPost(postPk) {
     }
 }
 async function selectFiles(postPk) {
-    let query = `SELECT file_location FROM files WHERE post_pk = ${postPk}`
+    let query = `SELECT name FROM files WHERE post_pk = ${postPk}`
     let {rows} = await db.query(query)
     let files = []
 
     for(let file of rows){
         let tmp = {
-            location : file.file_location
+            name : file.name
         }
         files.push(tmp)
     }
@@ -79,6 +79,15 @@ async function isFile(postPk) {
     return rows[0].file
 }
 
+async function updateOriginFiles(files) { // update되는 것 중에 db에서 파일 삭제
+    for(file of files) {
+        console.log('db : ' + file.name)
+        let query = ` DELETE FROM files
+            WHERE name = '${file.name}'`
+        await db.query(query)
+    } 
+}
+
 async function deleteFile(postPk) {
     let query = `DELETE FROM files WHERE post_pk = ${postPk}`
     await db.query(query)
@@ -94,6 +103,15 @@ async function updatePost(title, content, isfile, postPk) {
     await db.query(query)
 }
 
+async function checkIsFile(postPk) {
+    let query = `SELECT COUNT(*)
+        FROM files
+        WHERE post_pk = '${postPk}'`
+
+    const {rows} = await db.query(query)
+    return rows[0].count
+}
+
 
 
 module.exports={
@@ -105,5 +123,7 @@ module.exports={
     selectFiles,
     deletePost,
     updatePost,
-    isFile
+    isFile,
+    updateOriginFiles,
+    checkIsFile
 }

@@ -39,14 +39,22 @@ function onclickDelBtn(event){
         }
     }
 }
-
+function onclicUpdateDelBtn(event){
+    let closeDiv = event.target.closest("div")
+    closeDiv.style.display = "none";
+    for (var i = 0; i<oldFiles.length; i ++ ) {
+        if (closeDiv.id == oldFiles[i]) {
+            oldFiles.splice(i, 1);
+        }
+    }
+}
 async function formSubmit() {
     let formData = new FormData()
     const temp = JSON.stringify({ // input data 넣기
         title: document.getElementById("title").value, 
         content : document.getElementById("content").value,
         postPk : document.getElementById("postPk").value,
-        oldFiles : document.getElementById('oldFiles').value
+        oldFiles : oldFiles
      });
 
     for (let i = 0; i < fileList.length; i++) { // file data 넣기
@@ -81,10 +89,11 @@ function resultCb(value) { // 콜백함수 사용
 }
 
 window.onload = function(){
-    const tmp = document.getElementById('oldFiles').value
-    // console.log('oldFiles : ' + JSON.stringify(tmp))
-    console.log(JSON.parse(tmp))
+    let tmp = document.getElementById('oldFiles').value
+    console.log(tmp)
+
+    tmp = JSON.parse(tmp)
     for (let i = 0; i < tmp.length; i++) { // file data 넣기
-        console.log('oldFiles : ' + JSON.stringify(tmp[i].location))
+        oldFiles.push(tmp[i].name)
     }
 }
