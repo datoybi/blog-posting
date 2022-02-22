@@ -1,7 +1,7 @@
 let db = require('./config')
 
 async function getPostCount() {
-    let query = 'SELECT COUNT(*) FROM post' 
+    let query = 'SELECT COUNT(*) from posts' 
     let {rows} = await db.query(query)
     return rows[0].count
 }
@@ -14,7 +14,7 @@ async function getFileCount() {
 
 async function insertPost(title, content, isfile) {
     let postPk = Number(await getPostCount())+1
-    let query = `INSERT INTO post VALUES('${title}', '${content}', '${isfile}', '${postPk}', 0)`
+    let query = `INSERT INTO posts VALUES('${title}', '${content}', '${isfile}', '${postPk}', 0)`
     await db.query(query)
     return postPk
 }
@@ -27,21 +27,20 @@ async function insertfile(postPk, fileName) {
     }
 }
 
-async function selectPost(postPk) {
-    let query = `SELECT * FROM post WHERE post_pk = '${postPk}' and isdelete = '0'`
-    let {rows} = await db.query(query)
-    let contents = []
-    let files = ""
-    let data
+async function selectPost(postId) {
+    const query = `SELECT * from posts WHERE post_pk = '${postId}' and isdelete = '0'`;
+    const {rows} = await db.query(query);
+    let contents = [];
+    let files = "";
 
-    let tmp = {
+    let node = {
         title : rows[0].title,
         contents : rows[0].contents,
     }
-    contents.push(tmp)
+    contents.push(node);
     
-    if(rows[0].file == '1'){ // 파일이 있으면
-        files = await selectFiles(postPk)
+    if(rows[0].file === '1'){ // 파일이 있으면
+        files = await selectFiles(postId);
     }
 
     return {
@@ -49,22 +48,22 @@ async function selectPost(postPk) {
         files : files
     }
 }
-async function selectFiles(postPk) {
-    let query = `SELECT name FROM files WHERE post_pk = ${postPk}`
-    let {rows} = await db.query(query)
-    let files = []
+async function selectFiles(postId) {
+    let query = `SELECT name FROM files WHERE post_pk = ${postId}`;
+    let {rows} = await db.query(query);
+    let files = [];
 
     for(let file of rows){
-        let tmp = {
+        let node = {
             name : file.name
         }
-        files.push(tmp)
+        files.push(node);
     }
-    return files
+    return files;
 }
 
 async function deletePost(postPk) {
-    let query = `UPDATE post SET isdelete=1 WHERE post_pk = ${postPk}`
+    let query = `UPDATE posts SET isdelete=1 WHERE post_pk = ${postPk}`
     await db.query(query)
     let isfile = isFile(postPk)
 
@@ -74,7 +73,7 @@ async function deletePost(postPk) {
 }
 
 async function isFile(postPk) {
-    let query = `SELECT file FROM POST WHERE post_pk = ${postPk}`
+    let query = `SELECT file from posts WHERE post_pk = ${postPk}`
     let {rows} = await db.query(query)
     return rows[0].file
 }
@@ -88,8 +87,8 @@ async function updateOriginFiles(files) { // update되는 것 중에 db에서 �
     } 
 }
 
-async function deleteFile(postPk) {
-    let query = `DELETE FROM files WHERE post_pk = ${postPk}`
+async function deleteFile(postId) {
+    let query = `DELETE FROM files WHERE post_pk = ${postId}`
     await db.query(query)
 }
 
@@ -98,7 +97,7 @@ async function updatePost(title, content, isfile, postPk) {
         deleteFile(postPk)
     }
 
-    let query = `UPDATE post SET title = '${title}', contents = '${content}', file = '${isfile}'
+    let query = `UPDATE posts SET title = '${title}', contents = '${content}', file = '${isfile}'
     WHERE post_pk = ${postPk}`
     await db.query(query)
 }
@@ -125,5 +124,6 @@ module.exports={
     updatePost,
     isFile,
     updateOriginFiles,
-    checkIsFile
+    checkIsFile,
+    deleteFile
 }

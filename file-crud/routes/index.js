@@ -17,119 +17,122 @@ router.get('/', async function(req,res){
   res.render('upload');
 });
 
-router.post('/insertPost', upload.array('files'), async function(req,res){
-  let {body} = req.body
-  let title = JSON.parse(body).title
-  let content = JSON.parse(body).content
-  let isfile = '0'
+router.post('/post', upload.array('files'), async function(req,res){
+  const {body} = req.body;
+  const title = JSON.parse(body).title;
+  const content = JSON.parse(body).content;
+  let isFile = '0';
 
-  if(req.files.length != 0){
-    isfile = '1'
+  if(req.files.length !== 0){
+    isFile = '1';
   }
-  let postPk = await db.insertPost(title, content, isfile) // post 추가
-  if(isfile == '1'){ // 파일이 존재하면
-    let fileName = []
-    for(file of req.files) {
-      fileName.push(file.filename)
+  // db에 post 추가
+  const postId = await db.insertPost(title, content, isFile);
+  // db에 파일 추가
+  if(isFile === '1'){ 
+    let fileArr = [];
+    for(let file of req.files) {
+      fileArr.push(file.filename);
     }
-    await db.insertfile(postPk, fileName) // post 추가
+    await db.insertfile(postId, fileArr);
   }
-  res.send({'postPk':postPk})
+
+  res.send({'postId':postId});
 });
 
-router.get('/view', async function(req,res){
-  const postPk = req.query.postPk
-  let result = await db.selectPost(postPk) 
-  console.log(JSON.stringify(result))
-// !! {"contents":[{"title":"1111","contents":"2222"}],"files":[{"location":"1645081091363__DDDDDDDD.jpg"}]}
-  res.render('view', {data: result, postPk: postPk});
+router.get('/post/:id', async function(req,res){
+  const postId = req.params.id;
+  const result = await db.selectPost(postId);
+  res.render('view', {data: result, postId: postId});
 });
 
-router.get('/delete', async function(req,res){
-  const postPk = req.query.postPk
-  // 일단 post table의 isdelete값을 1로 update 하고 이미지들은 삭제해줬다.
-  await db.deletePost(postPk)
-  let files = await db.selectFiles(postPk)
+router.delete('/post/:id', async function(req,res){
+  const postId = req.params.id;
   
-  // 업로드된 파일 제거
-  for(let file of files){
-    fs.unlink(`${process.env.FILE_LOCATION}/${file.name}`, err => { 
-      if(err){
-        console.log('파일제거 에러 발생')
-      }
-    })
+  // db에서 post 삭제
+  await db.deletePost(postId);
+  // 파일 여부 체크
+  const isFile = await db.isFile(postId);
+  if(isFile === '1') {
+    const files = await db.selectFiles(postId);
+  
+    // 업로드된 파일 제거
+    for(let file of files){
+      fs.unlink(`${process.env.FILE_LOCATION}/${file.name}`, err => { 
+        if(err){
+          console.log('파일제거 에러 발생');
+        }
+      })
+    }
+    // db 파일 제거
+    await db.deleteFile(postId);
   }
-  res.render('upload');
 });
 
-router.get('/update', async function(req,res){
-  const postPk = req.query.postPk
-  let result = await db.selectPost(postPk) 
-  console.log(result)
-  res.render('update', {data: result, postPk: postPk});
+router.get('/post/:id/edit', async function(req,res){
+  const postId = req.params.id;
+  let result = await db.selectPost(postId);
+  res.render('update', {data: result, postId: postId});
 });
 
-router.post('/updatePost', upload.array('files'), async function(req,res){
-  let {body} = req.body
-  let postPk = JSON.parse(body).postPk
-  let title = JSON.parse(body).title
-  let content = JSON.parse(body).content
-  let isDBfile = await db.isFile(postPk)
-  let oldFiles = JSON.parse(body).oldFiles
-  let isNewFile = '0'
+router.put('/post/:id', upload.array('files'), async function(req,res){
+  const {body} = req.body;
+  const postId = req.params.id;
+  const title = JSON.parse(body).title;
+  const content = JSON.parse(body).content;
+  let isDBFile = await db.isFile(postId);
+  const oldFiles = JSON.parse(body).oldFiles;
+  let isNewFile = '0';
+  let dbFiles;
   let isFile = '1'
-  console.log('old files (이미 파일이 있는것 중에 새로운 이미지): ' + JSON.stringify(oldFiles))
-  console.log('new added files : ' + JSON.stringify(req.files))
-  let dbFiles
-  let dbFileLen
 
-  console.log('isDBfILE : ' + isDBfile)
-  if (isDBfile == '1'){
-    dbFiles = await db.selectFiles(postPk)
-    dbFileLen = dbFiles.length
-    console.log('dbFiles : ' + dbFiles)
+  // 기존 파일 처리
+  if (isDBFile === '1'){
+    dbFiles = await db.selectFiles(postId);
 
+    // 기존 파일중 삭제된 파일 구하기
     for(let i=0; i < dbFiles.length; i++){
       for(let j of oldFiles){
-        if(dbFiles[i].name == j) {
-          dbFiles.splice(i, 1)
+        if(dbFiles[i].name === j) {
+          dbFiles.splice(i, 1);
         }
       } 
     }
+    // 기존 파일에서 삭제된 파일이 있으면
     if(dbFiles) {
-      await db.updateOriginFiles(dbFiles) // db 삭제
-      for(let file of dbFiles){ // 업로드 이미지 삭제
+      // db 삭제
+      await db.updateOriginFiles(dbFiles);
+      // 업로드 이미지 삭제
+      for(let file of dbFiles){ 
         fs.unlink(`${process.env.FILE_LOCATION}/${file.name}`, err => { 
           if(err){
-            console.log('파일제거 에러 발생')
+            console.log('파일제거 에러 발생');
           }
         })
       }
+    }
   }
-}
 
-
-if(req.files.length != 0){
-  isNewFile = '1'
-}
-
-if(isNewFile == '1'){ // 파일이 존재하면
-  let fileName = []
-  for(file of req.files) {
-    fileName.push(file.filename)
+  // 새로운 파일 처리
+  if(req.files.length != 0){
+    isNewFile = '1';
   }
-  await db.insertfile(postPk, fileName) // post 추가
-}
+  if(isNewFile == '1'){ 
+    let newFiles = [];
+    for(file of req.files) {
+      newFiles.push(file.filename);
+    }
+    await db.insertfile(postId, newFiles);
+  }
 
-let checkIsFile = await db.checkIsFile(postPk)
-console.log('checkIsFile : ' + checkIsFile)
+  // 파일이 존재하는지 체크해서 post의 file 컬럼에 반영
+  const checkIsFile = await db.checkIsFile(postId);
+  if(checkIsFile === '0') {
+    isFile = '0';
+  }
+  await db.updatePost(title, content, isFile, postId);
 
-if(checkIsFile == '0') {
-  isFile = '0'
-}
-
-await db.updatePost(title, content, isFile, postPk) // post 수정  
-
-  res.send({'postPk':postPk})
+  res.send({'postId':postId})
 });
+
 module.exports = router;

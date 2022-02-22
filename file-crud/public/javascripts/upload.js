@@ -1,7 +1,6 @@
-let fileList = [];
-let oldFiles = [];
+let fileList = []
 
-// 게시물 수정 섬네일 세팅
+// 게시물 작성 섬네일 세팅
 function setThumbnail(event) { 
     for (let image of event.target.files) { 
         fileList.push(image);
@@ -24,7 +23,7 @@ function setThumbnail(event) {
 
             div.append(img);
             div.append(delBtn);
-            document.querySelector("div#imageContainer").appendChild(div); 
+            document.querySelector("div#image_container").appendChild(div); 
         }; 
         reader.readAsDataURL(image); 
     } 
@@ -39,31 +38,19 @@ function onclickDelBtn(event){
         }
     }
 }
-function onclicUpdateDelBtn(event){
-    let closeDiv = event.target.closest("div")
-    closeDiv.style.display = "none";
-    for (var i = 0; i<oldFiles.length; i ++ ) {
-        if (closeDiv.id == oldFiles[i]) {
-            oldFiles.splice(i, 1);
-        }
-    }
-}
+
 async function formSubmit() {
     let formData = new FormData()
-    const postId = document.getElementById("postId").value;
     const temp = JSON.stringify({ // input data 넣기
         title: document.getElementById("title").value, 
-        content : document.getElementById("content").value,
-        postId : postId,
-        oldFiles : oldFiles
+        content : document.getElementById("content").value
      });
-
     for (let i = 0; i < fileList.length; i++) { // file data 넣기
         formData.append('files', fileList[i]);
     }
     formData.append('body', temp);
     formData.append('files', fileList);
-    makeRequest(formData, 'put', `/post/${postId}`, resultCb);
+    makeRequest(formData, 'post', 'post', resultCb);
 }
 
 function makeRequest(formData, method, url, callback) { // ajax
@@ -84,15 +71,6 @@ function makeRequest(formData, method, url, callback) { // ajax
     httpRequest.send(formData);
 }
 
-function resultCb(value) {
-    location.href=`/post/${value}`
-}
-
-window.onload = function(){
-    let files = document.getElementById('oldFiles').value;
-
-    files = JSON.parse(files);
-    for (let i = 0; i < files.length; i++) {
-        oldFiles.push(files[i].name);
-    }
+function resultCb(value) { 
+    location.href=`/post/${value}`;
 }

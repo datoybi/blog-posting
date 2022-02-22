@@ -27,15 +27,12 @@
           <label for="content" class="col-sm-2 col-form-label">파일 첨부</label>
             <div class="col-sm-10">
               <% if(data.files) {%> 
-                <% data.files.forEach(file=> { %>
-                <img class="viewer-image" src="http://192.168.1.55:3001/uploadedFiles/<%=file.name%>">
+                <% data.files.forEach(file => { %>
+                <img class="viewer-image" src="http://192.168.1.55:3001/uploads/<%=file.name%>">
                 <% }) %>
               <% } %>
           </div>
         </div>      
-        <div class="mb-3 row">
-          <div class="col-sm-10" id="image_container"></div>
-        </div>
         <div class="col-auto">
           <button type="button" id="deleteBtn" class="btn btn-primary mb-3">삭제</button>
           <button type="button" id="updateBtn" class="btn btn-primary mb-3">수정</button>
@@ -43,6 +40,6 @@
         </div>
         <hr>
       </div>
-      <input type="hidden" id="postPk" value ="<%= postPk %>" />
+      <input type="hidden" id="postId" value ="<%= postId %>" />
     </body>
 </html>

@@ -1,24 +1,25 @@
 
 window.onload = function(){
-    let postPk = document.getElementById("postPk")
-    let backBtn = document.getElementById("backBtn")
+    const postId = document.getElementById("postId");
+    const backBtn = document.getElementById("backBtn");
     backBtn.onclick = function(){
-        location.href=`/`
+        location.href=`/`;
     };
 
-    let updateBtn = document.getElementById("updateBtn")
+    const updateBtn = document.getElementById("updateBtn");
     updateBtn.onclick = function(){
-        location.href=`/update?postPk=${postPk.value}`
+        // location.href는 get만 가능
+        location.href=`/post/${postId.value}/edit`;
     };
 
-    let deleteBtn = document.getElementById("deleteBtn")
+    const deleteBtn = document.getElementById("deleteBtn");
     deleteBtn.onclick = function(){
         if(window.confirm("삭제하시겠습니까?")) { 
-            alert('삭제되었습니다')
-            location.href=`/delete?postPk=${postPk.value}`
+            alert('삭제되었습니다');
+            fetch(`/post/${postId.value}`, {
+                method: 'DELETE',
+            })
+            location.href=`/`;
         }
     };
-
 };
-
-
