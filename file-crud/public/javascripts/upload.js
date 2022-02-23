@@ -23,7 +23,7 @@ function setThumbnail(event) {
 
             div.append(img);
             div.append(delBtn);
-            document.querySelector("div#image_container").appendChild(div); 
+            document.querySelector("div#imageContainer").appendChild(div); 
         }; 
         reader.readAsDataURL(image); 
     } 
