@@ -40,6 +40,8 @@ function onclickDelBtn(event){
 }
 
 async function formSubmit() {
+    console.log(fileList)
+
     let formData = new FormData()
     const temp = JSON.stringify({ // input data 넣기
         title: document.getElementById("title").value, 

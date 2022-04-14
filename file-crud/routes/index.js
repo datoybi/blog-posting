@@ -23,6 +23,7 @@ router.post('/post', upload.array('files'), async function(req,res){
   const content = JSON.parse(body).content;
   let isFile = '0';
 
+  console.log(req.files)
   if(req.files.length !== 0){
     isFile = '1';
   }
