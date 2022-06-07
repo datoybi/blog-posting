@@ -1,0 +1,37 @@
+.range-slider {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+span {
+  margin: 0 10px;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  overflow: hidden;
+  width: 100%;
+  height: 10px;
+  background: transparent;
+  cursor: pointer;
+  background: #e5e4e3;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  box-shadow: -100vw 0 0 100vw dodgerblue;
+  border: 0.1px solid dodgerblue;
+  cursor: pointer;
+}
+button {
+  width: 70px;
+}
+span {
+  width: 40px;
+}
